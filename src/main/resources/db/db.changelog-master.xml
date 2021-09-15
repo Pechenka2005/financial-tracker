@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet id="0" author="Vadim Makarov" objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+        <createTable tableName="users">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" primaryKeyName="user_id_pk" nullable="false"/>
+            </column>
+            <column name="username" type="clob">
+                <constraints unique="true" uniqueConstraintName="user_username_unq" />
+            </column>
+        </createTable>
+
+        <createTable tableName="currencies">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" primaryKeyName="currency_id_pk" />
+            </column>
+            <column name="short_str" type="clob">
+                <constraints unique="true" nullable="false" uniqueConstraintName="currency_shortstr_unq"
+                             notNullConstraintName="currency_shortstr_nn" />
+            </column>
+            <column name="long_str" type="clob">
+                <constraints unique="true" nullable="false" uniqueConstraintName="currency_longstr_unq"
+                             notNullConstraintName="currency_longstr_nn" />
+            </column>
+            <column name="coeff" type="decimal" />
+            <column name="symbol" type="clob" />
+        </createTable>
+
+        <createTable tableName="wallets">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" primaryKeyName="wallet_id_pk" />
+            </column>
+            <column name="expenses_limit" type="bigint" />
+            <column name="name" type="clob" />
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="wallet_user_id_nn"/>
+            </column>
+            <column name="currency_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="wallet_currency_id_nn" />
+            </column>
+        </createTable>
+
+        <createTable tableName="categories">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" primaryKeyName="category_id_pk" />
+            </column>
+            <column name="name" type="clob" />
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="category_user_id_nn" />
+            </column>
+            <column name="icon_color" type="clob">
+                <constraints nullable="false" notNullConstraintName="category_icon_color_nn" />
+            </column>
+            <column name="icon_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="category_icon_id_nn" />
+            </column>
+            <column name="is_income" type="boolean">
+                <constraints nullable="false" notNullConstraintName="category_is_income_nn" />
+            </column>
+        </createTable>
+
+        <createTable tableName="transactions">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" primaryKeyName="transaction_id_pk" />
+            </column>
+            <column name="is_income" type="boolean">
+                <constraints nullable="false" notNullConstraintName="transaction_is_income_nn" />
+            </column>
+            <column name="value" type="decimal">
+                <constraints nullable="false" notNullConstraintName="transaction_value_nn" />
+            </column>
+            <column name="ts" type="datetime">
+                <constraints nullable="false" notNullConstraintName="transaction_ts_nn" />
+            </column>
+            <column name="currency_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="transaction_currency_id_nn" />
+            </column>
+            <column name="wallet_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="transaction_wallet_id_nn" />
+            </column>
+            <column name="category_id" type="bigint">
+                <constraints nullable="false" notNullConstraintName="transaction_category_id_nn" />
+            </column>
+        </createTable>
+
+        <createSequence sequenceName="hibernate_sequence" incrementBy="1" startValue="1" />
+
+        <addAutoIncrement tableName="users" columnName="id" columnDataType="bigint" startWith="1" incrementBy="1" />
+        <addAutoIncrement tableName="currencies" columnName="id" columnDataType="bigint" startWith="1" incrementBy="1" />
+        <addAutoIncrement tableName="wallets" columnName="id" columnDataType="bigint" startWith="1" incrementBy="1" />
+        <addAutoIncrement tableName="categories" columnName="id" columnDataType="bigint" startWith="1" incrementBy="1" />
+        <addAutoIncrement tableName="transactions" columnName="id" columnDataType="bigint" startWith="1" incrementBy="1" />
+
+        <addForeignKeyConstraint baseTableName="wallets" baseColumnNames="user_id" constraintName="wallet_user_id_fk"
+                                 referencedTableName="users" referencedColumnNames="id" />
+        <addForeignKeyConstraint baseTableName="wallets" baseColumnNames="currency_id"
+                                 constraintName="wallet_currency_id_fk" referencedTableName="currencies"
+                                 referencedColumnNames="id" />
+        <addForeignKeyConstraint baseTableName="categories" baseColumnNames="user_id" constraintName="category_user_id_fk"
+                                 referencedTableName="users" referencedColumnNames="id" />
+        <addForeignKeyConstraint baseTableName="transactions" baseColumnNames="currency_id"
+                                 constraintName="transaction_currency_id_fk" referencedTableName="currencies"
+                                 referencedColumnNames="id" />
+        <addForeignKeyConstraint baseTableName="transactions" baseColumnNames="wallet_id"
+                                 constraintName="transaction_wallet_id_fk" referencedTableName="wallets"
+                                 referencedColumnNames="id" />
+        <addForeignKeyConstraint baseTableName="transactions" baseColumnNames="category_id"
+                                 constraintName="transaction_category_id_fk" referencedTableName="categories"
+                                 referencedColumnNames="id" />
+        <insert tableName="currencies">
+            <column name="short_str" value="RUS"/>
+            <column name="long_str" value="Российский рубль" />
+            <column name="coeff" value="1" />
+            <column name="symbol" value="₽" />
+        </insert>
+        <insert tableName="currencies">
+            <column name="short_str" value="USD"/>
+            <column name="long_str" value="Доллар США" />
+            <column name="coeff" value="75.55" />
+            <column name="symbol" value="$" />
+        </insert>
+        <insert tableName="currencies">
+            <column name="short_str" value="EUR"/>
+            <column name="long_str" value="Евро" />
+            <column name="coeff" value="88.4" />
+            <column name="symbol" value="€" />
+        </insert>
+        <insert tableName="currencies">
+            <column name="short_str" value="CHF"/>
+            <column name="long_str" value="Швейцарские франки" />
+            <column name="coeff" value="83.2" />
+            <column name="symbol" value="₣" />
+        </insert>
+        <insert tableName="currencies">
+            <column name="short_str" value="KWD"/>
+            <column name="long_str" value="Кувейтский динар" />
+            <column name="coeff" value="245.44" />
+            <column name="symbol" value="KD" />
+        </insert>
+        <insert tableName="currencies">
+            <column name="short_str" value="BHD"/>
+            <column name="long_str" value="Бахрейнский динар" />
+            <column name="coeff" value="195.98" />
+            <column name="symbol" value="BD" />
+        </insert>
+        <insert tableName="currencies">
+            <column name="short_str" value="OMR"/>
+            <column name="long_str" value="Оманский риал" />
+            <column name="coeff" value="191.9" />
+            <column name="symbol" value="﷼" />
+        </insert>
+        <insert tableName="currencies">
+            <column name="short_str" value="JPY"/>
+            <column name="long_str" value="Японская иена" />
+            <column name="coeff" value="0.67" />
+            <column name="symbol" value="¥" />
+        </insert>
+        <insert tableName="currencies">
+            <column name="short_str" value="SEK"/>
+            <column name="long_str" value="Шведская крона" />
+            <column name="coeff" value="8.48" />
+            <column name="symbol" value="kr" />
+        </insert>
+    </changeSet>
+    <changeSet author="Sergey Efimov" id="addColumn-hidden-wallets">
+        <addColumn tableName="wallets" >
+            <column name="hidden" type="boolean" defaultValue="false">
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="Sergey Efimov" id="change-column-RUS">
+        <update tableName="currencies">
+            <column name="short_str" value='RUB' type="varchar(50)"/>
+            <where>short_str='RUS'</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

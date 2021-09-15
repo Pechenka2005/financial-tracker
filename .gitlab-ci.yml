@@ -1,0 +1,46 @@
+image: docker:latest
+services:
+  - docker:dind
+
+stages:
+  - build
+  - docker-build-push
+  - deploy
+
+
+financial-tracker-build:
+  image: gradle:7.2.0-jdk11
+  stage: build
+  script: "gradle build"
+  artifacts:
+    paths:
+      - build/libs/*.jar
+
+
+
+financial-tracker-build-push:
+  stage: docker-build-push
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker build -t registry.gitlab.com/run4w4y/finances-tracker .
+    - docker push registry.gitlab.com/run4w4y/finances-tracker
+
+
+financial-tracker-deploy:
+  image: google/cloud-sdk
+  stage: deploy
+  when: manual
+  only:
+    - main
+  script:
+    - echo "$GOOGLE_KEY" > key.json
+    - gcloud auth activate-service-account --key-file key.json
+    - gcloud config list
+    - gcloud config set compute/zone europe-north1-a
+    - gcloud config set compute/region europe-north1
+    - gcloud config set project sirius-322318
+    - gcloud config set disable_usage_reporting True
+    - gcloud config list
+    - gcloud compute instances update-container $VM_INSTANCE --container-image registry.gitlab.com/run4w4y/finances-tracker:latest --container-restart-policy on-failure
+      --container-env DB_HOST=34.116.131.138:5432,DB_NAME=sirius8_db,DB_USERNAME=sirius8,DB_PASSWORD=Fvc2ds \
+
