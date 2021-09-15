@@ -42,5 +42,5 @@ financial-tracker-deploy:
     - gcloud config set disable_usage_reporting True
     - gcloud config list
     - gcloud compute instances update-container $VM_INSTANCE --container-image registry.gitlab.com/run4w4y/finances-tracker:latest --container-restart-policy on-failure
-      --container-env DB_HOST=34.116.131.138:5432,DB_NAME=sirius8_db,DB_USERNAME=sirius8,DB_PASSWORD=Fvc2ds \
+      --container-env DB_HOST=${DB_HOST},DB_NAME=${DB_NAME},DB_USERNAME=${DB_USERNAME},DB_PASSWORD=${DB_PASSWORD} \
 
